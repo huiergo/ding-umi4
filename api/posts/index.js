@@ -32586,31 +32586,28 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
   switch (req.method) {
     case 'GET': 
       const redis = Redis.fromEnv();
-      console.log('redis---',redis)
 
-    const set = await redis.set("node", '{"hello":"world"}');
-
-    const get = await redis.get("node");
-    console.log('[get]',get)
-    //   let post = await redis.get('post-' + req.params.postId);
-    //   if (post) {
-    //     res.status(200).json(post);
-    //     return;
-    //   }
-    //   if (!post) {
-    //     prisma = new PrismaClient();
-    //     post = await prisma.post.findUnique({
-    //       where: { id: +req.params.postId },
-    //       include: { author: true }
-    //     });
-    //     if (post) {
-    //       res.status(200).json(post);
-    //     } else {
-    //       res.status(404).json({ error: 'Post not found.' });
-    //     }
-    //     await redis.set('post-' + req.params.postId, JSON.stringify(post));
-    //     await prisma.$disconnect();
-    //   }
+      let post = await redis.get('post-' + req.params.postId);
+      if (post) {
+        res.status(200).json(post);
+        return;
+      }
+      if (!post) {
+        prisma = new PrismaClient();
+        post = await prisma.post.findUnique({
+          where: { id: +req.params.postId },
+          include: { author: true }
+        });
+        if (post) {
+          res.status(200).json(post);
+        } else {
+          res.status(404).json({ error: 'Post not found.' });
+        }
+        console.log('[prisma \u5B58\u5230redis \u4E2D\u7684\u6570\u636E\u662F]',post)
+        await redis.set('post-' + req.params.postId, JSON.stringify(post));
+        // await redis.set('node',5)
+        await prisma.$disconnect();
+      }
       break;
     default:
       res.status(405).json({ error: 'Method not allowed' })
