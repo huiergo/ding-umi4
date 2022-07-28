@@ -29,7 +29,7 @@ export default function Page() {
      const data=await res.json()
      console.log('[后端返回的数据----]',data)
      alert(`welcom back ${data.email}`)
-     history.push('/posts/create')
+     history.push('/posts/login')
     } catch (err) {
       console.error(err)
     }

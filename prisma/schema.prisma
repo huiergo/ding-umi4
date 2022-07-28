@@ -1,33 +1,33 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["referentialIntegrity"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity", "referentialActions"]
 }
 
 datasource db {
-    provider             = "mysql"
-    referentialIntegrity = "prisma"
-    url                  = env("DATABASE_URL")
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
 }
 
 model Post {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    title     String   @db.VarChar(255)
-    content   String?
-    author    User     @relation(fields: [authorId], references: [id])
-    authorId  Int
-    imageUrl  String?
-    tags      String
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String   @db.VarChar(255)
+  content   String?
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  Int
+  imageUrl  String?
+  tags      String
 
-    @@index(authorId)
+  @@index([authorId])
 }
 
 model User {
-    id           Int     @id @default(autoincrement())
-    email        String  @unique
-    passwordHash String
-    name         String?
-    posts        Post[]
-    avatarUrl    String?
+  id           Int     @id @default(autoincrement())
+  email        String  @unique
+  passwordHash String
+  name         String?
+  posts        Post[]
+  avatarUrl    String?
 }

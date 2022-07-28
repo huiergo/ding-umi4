@@ -106,3 +106,5 @@ platform: 'vercel'
 <!-- redis -->
 fetch之后
 <!--  git 发布，关联 cloud prisma -->
+
+<!-- prisma 不生效的时候： 重新生成下 -->
