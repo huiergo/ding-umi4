@@ -19,8 +19,7 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
             email: req.body.email,
             // 密码是经过 bcrypt 加密的
             passwordHash: bcrypt.hashSync(req.body.password, 8),
-            // name: req.body.name,
-            // avatarUrl: req.body.avatarUrl
+
           }
         });
         console.log('[register result]',user)

@@ -28,8 +28,8 @@ export default function Page() {
      
      const data=await res.json()
      console.log('[后端返回的数据----]',data)
-     alert(`welcom back ${data.email}`)
-     history.push('/posts/login')
+     alert(`${data.email}~ 注册成功 `)
+     history.push('/login')
     } catch (err) {
       console.error(err)
     }

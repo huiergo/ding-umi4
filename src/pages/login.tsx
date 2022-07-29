@@ -20,11 +20,13 @@ export default function Page() {
        body:JSON.stringify({email,password})
      })
      if(res.status!==200){
+      alert(`账号或者密码错误`)
       return console.error(res.text())
      }
-     const {name}=await res.json()
-     alert(`welcom back ${name}`)
-     history.push('/posts/create')
+     const data=await res.json()
+     alert(`${data.email}~ 欢迎回来`)
+     history.push('/list')
+ 
     } catch (err) {
       console.error(err)
     }

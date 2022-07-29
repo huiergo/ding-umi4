@@ -22,17 +22,31 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
       const authorId = (await verifyToken(req.cookies.token)).id;
       console.log(22,authorId)
       prisma = new PrismaClient();
-      console.log(33)
-      const newPost = await prisma.post.create({
-        data: {
-          title: req.body.title,
-          content: req.body.content,
-          createdAt: new Date(),
-          authorId,
-          tags: req.body.tags.join(','),
-          imageUrl: req.body.imageUrl
-        }
-      })
+      let newPost={}
+      if(req.body.keyword){
+        console.log('[req.body---]请求的入参',req.body)
+        newPost = await prisma.post.findMany({
+          where: { 
+            title: {
+              contains: req.body.keyword,
+            } 
+        },
+          include: { author: true }
+        });
+
+      }else{
+        newPost =req.body.keyword&& await prisma.post.create({
+          data: {
+            title: req.body.title,
+            content: req.body.content,
+            createdAt: new Date(),
+            authorId,
+            tags: req.body.tags.join(','),
+            imageUrl: req.body.imageUrl
+          }
+        })
+      }
+       
       res.status(200).json(newPost);
       await prisma.$disconnect()
       break;

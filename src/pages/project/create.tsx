@@ -21,7 +21,7 @@ export default function Page() {
 
   async function submit() {
     try {
-      const res = await fetch('/api/posts', {
+      const res = await fetch('/api/project', {
         method: "POST",
         body: JSON.stringify({
           title,
@@ -38,7 +38,8 @@ export default function Page() {
         alert('发布失败');
         return;
       }
-      history.push('/posts/' + (await res.json()).id);
+      // history.push('/project/' + (await res.json()).id);
+      history.push('/list')
     } catch (err) {
       console.error(err);
     }

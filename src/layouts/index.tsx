@@ -1,5 +1,7 @@
 import { Link, Outlet } from 'umi';
 import styles from './index.less';
+import { history } from 'umi';
+import { delCookie } from '@/utils/cookie';
 
 export default function Layout() {
 
@@ -11,7 +13,18 @@ export default function Layout() {
       if(res.status!=200){
         return console.error(res.text())
       }
+      history.push('/login')
       alert(`已清空`)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  function logout(){
+    try {
+      delCookie('token')
+      history.push('/login')
+
     } catch (error) {
       console.error(error)
     }
@@ -25,6 +38,9 @@ export default function Layout() {
         </li>
         <li>
           <Link to="/register">注册</Link>
+        </li>
+        <li onClick={logout}>
+          登出
         </li>
       </ul>
 

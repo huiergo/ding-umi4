@@ -9,13 +9,18 @@
     "start": "npm run dev"
   },
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
+    "@ant-design/pro-components": "^1.1.14",
+    "@antv/g2plot": "^2.4.20",
     "@prisma/client": "^4.1.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/jsonwebtoken": "^8.5.8",
     "@upstash/redis": "^1.10.1",
+    "antd": "^4.22.2",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.5.1",
     "prisma": "^4.1.0",
+    "rc-resize-observer": "^1.2.0",
     "umi": "^4.0.8"
   },
   "devDependencies": {

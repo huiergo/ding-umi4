@@ -34389,7 +34389,7 @@ async function login_default(req, res) {
 
 // src/.umi/api/login.ts
 var import_apiRoute = __toESM2(require_apiRoute());
-var apiRoutes = [{ "path": "posts/[postId]", "id": "posts/[postId]", "file": "posts/[postId].ts", "absPath": "/posts/[postId]", "__content": `import { UmiApiRequest, UmiApiResponse } from "umi";
+var apiRoutes = [{ "path": "project/[postId]", "id": "project/[postId]", "file": "project/[postId].ts", "absPath": "/project/[postId]", "__content": `import { UmiApiRequest, UmiApiResponse } from "umi";
 import { PrismaClient } from '@prisma/client';
 const { Redis } = require("@upstash/redis/with-fetch");
 
@@ -34397,29 +34397,107 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
   let prisma: PrismaClient;
   switch (req.method) {
     case 'GET': 
-      // const redis = Redis.fromEnv();
+      const redis = Redis.fromEnv();
 
-      // let post = await redis.get('post-' + req.params.postId);
-      // if (post) {
-      //   res.status(200).json(post);
-      //   return;
-      // }
-      // if (!post) {
-      //   prisma = new PrismaClient();
-      //   post = await prisma.post.findUnique({
-      //     where: { id: +req.params.postId },
-      //     include: { author: true }
-      //   });
-      //   if (post) {
-      //     res.status(200).json(post);
-      //   } else {
-      //     res.status(404).json({ error: 'Post not found.' });
-      //   }
-      //   console.log('[prisma \u5B58\u5230redis \u4E2D\u7684\u6570\u636E\u662F]',post)
-      //   await redis.set('post-' + req.params.postId, JSON.stringify(post));
-      //   // await redis.set('node',5)
-      //   await prisma.$disconnect();
-      // }
+      let post = await redis.get('post-' + req.params.postId);
+      if (post) {
+        res.status(200).json(post);
+        return;
+      }
+      if (!post) {
+        prisma = new PrismaClient();
+        post = await prisma.post.findUnique({
+          where: { id: +req.params.postId },
+          include: { author: true }
+        });
+        if (post) {
+          res.status(200).json(post);
+        } else {
+          res.status(404).json({ error: 'Post not found.' });
+        }
+        console.log('[prisma \u5B58\u5230redis \u4E2D\u7684\u6570\u636E\u662F]',post)
+        await redis.set('post-' + req.params.postId, JSON.stringify(post));
+        // await redis.set('node',5)
+        await prisma.$disconnect();
+      }
+      break;
+    default:
+      res.status(405).json({ error: 'Method not allowed' })
+  }
+}
+` }, { "path": "posts/[postId]", "id": "posts/[postId]", "file": "posts/[postId].ts", "absPath": "/posts/[postId]", "__content": `import { UmiApiRequest, UmiApiResponse } from "umi";
+import { PrismaClient } from '@prisma/client';
+const { Redis } = require("@upstash/redis/with-fetch");
+
+export default async function (req: UmiApiRequest, res: UmiApiResponse) {
+  let prisma: PrismaClient;
+  switch (req.method) {
+    case 'GET': 
+      const redis = Redis.fromEnv();
+
+      let post = await redis.get('post-' + req.params.postId);
+      if (post) {
+        res.status(200).json(post);
+        return;
+      }
+      if (!post) {
+        prisma = new PrismaClient();
+        post = await prisma.post.findUnique({
+          where: { id: +req.params.postId },
+          include: { author: true }
+        });
+        if (post) {
+          res.status(200).json(post);
+        } else {
+          res.status(404).json({ error: 'Post not found.' });
+        }
+        console.log('[prisma \u5B58\u5230redis \u4E2D\u7684\u6570\u636E\u662F]',post)
+        await redis.set('post-' + req.params.postId, JSON.stringify(post));
+        // await redis.set('node',5)
+        await prisma.$disconnect();
+      }
+      break;
+    default:
+      res.status(405).json({ error: 'Method not allowed' })
+  }
+}
+` }, { "path": "project", "id": "project/index", "file": "project/index.ts", "absPath": "/project", "__content": `import { UmiApiRequest, UmiApiResponse } from "umi";
+import { PrismaClient } from '@prisma/client'
+import { verifyToken } from "@/utils/jwt";
+
+export default async function (req: UmiApiRequest, res: UmiApiResponse) {
+  let prisma: PrismaClient;
+  switch (req.method) {
+    case 'GET':
+      prisma = new PrismaClient();
+      const allPosts = await prisma.post.findMany({ include: { author: true } });
+      res.status(200).json(allPosts);
+      await prisma.$disconnect()
+      break;
+
+    case 'POST':
+      if (!req.cookies?.token) {
+        return res.status(401).json({
+          message: 'Unauthorized'
+        })
+      }
+      console.log(11)
+      const authorId = (await verifyToken(req.cookies.token)).id;
+      console.log(22,authorId)
+      prisma = new PrismaClient();
+      console.log(33)
+      const newPost = await prisma.post.create({
+        data: {
+          title: req.body.title,
+          content: req.body.content,
+          createdAt: new Date(),
+          authorId,
+          tags: req.body.tags.join(','),
+          imageUrl: req.body.imageUrl
+        }
+      })
+      res.status(200).json(newPost);
+      await prisma.$disconnect()
       break;
     default:
       res.status(405).json({ error: 'Method not allowed' })
@@ -34445,8 +34523,11 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
           message: 'Unauthorized'
         })
       }
+      console.log(11)
       const authorId = (await verifyToken(req.cookies.token)).id;
+      console.log(22,authorId)
       prisma = new PrismaClient();
+      console.log(33)
       const newPost = await prisma.post.create({
         data: {
           title: req.body.title,
@@ -34485,8 +34566,7 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
             email: req.body.email,
             // \u5BC6\u7801\u662F\u7ECF\u8FC7 bcrypt \u52A0\u5BC6\u7684
             passwordHash: bcrypt.hashSync(req.body.password, 8),
-            // name: req.body.name,
-            // avatarUrl: req.body.avatarUrl
+
           }
         });
         console.log('[register result]',user)
@@ -34513,8 +34593,6 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
   }
 }` }, { "path": "clear", "id": "clear", "file": "clear.ts", "absPath": "/clear", "__content": `import type { UmiApiRequest, UmiApiResponse } from "umi";
 import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-import { signToken } from "@/utils/jwt";
  
 export default async function (req: UmiApiRequest, res: UmiApiResponse) {
   switch (req.method) {
@@ -34525,11 +34603,7 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
  
         // \u5EFA\u7ACB\u4E00\u4E2A Prisma \u5BA2\u6237\u7AEF\uFF0C\u4ED6\u53EF\u4EE5\u5E2E\u52A9\u6211\u4EEC\u8FDE\u7EBF\u5230\u6570\u636E\u5E93
         const prisma = new PrismaClient();
-        await prisma.user.delete({
-          where: {
-            email: 'ding4',
-          },
-        });
+        await prisma.user.deleteMany()
         console.log('[clear result]')
         // \u628A\u5EFA\u7ACB\u6210\u529F\u7684\u7528\u6237\u6570\u636E\uFF08\u4E0D\u5305\u542B\u5BC6\u7801\uFF09\u548C JWT \u56DE\u4F20\u7ED9\u524D\u7AEF
         res.status(200)
@@ -34577,6 +34651,62 @@ export default async function (req: UmiApiRequest, res: UmiApiResponse) {
       } catch (error: any) {
         res.status(500).json(error);
       }
+      break;
+    default:
+      res.status(405).json({ error: 'Method not allowed' })
+  }
+}
+` }, { "path": "list", "id": "list", "file": "list.ts", "absPath": "/list", "__content": `import { UmiApiRequest, UmiApiResponse } from "umi";
+import { PrismaClient } from '@prisma/client'
+import { verifyToken } from "@/utils/jwt";
+
+export default async function (req: UmiApiRequest, res: UmiApiResponse) {
+  let prisma: PrismaClient;
+  switch (req.method) {
+    case 'GET':
+      prisma = new PrismaClient();
+      const allPosts = await prisma.post.findMany({ include: { author: true } });
+      res.status(200).json(allPosts);
+      await prisma.$disconnect()
+      break;
+
+    case 'POST':
+      if (!req.cookies?.token) {
+        return res.status(401).json({
+          message: 'Unauthorized'
+        })
+      }
+      console.log(11)
+      const authorId = (await verifyToken(req.cookies.token)).id;
+      console.log(22,authorId)
+      prisma = new PrismaClient();
+      let newPost={}
+      if(req.body.keyword){
+        console.log('[req.body---]\u8BF7\u6C42\u7684\u5165\u53C2',req.body)
+        newPost = await prisma.post.findMany({
+          where: { 
+            content: {
+              contains: req.body.keyword,
+            } 
+        },
+          include: { author: true }
+        });
+
+      }else{
+        newPost = await prisma.post.create({
+          data: {
+            title: req.body.title,
+            content: req.body.content,
+            createdAt: new Date(),
+            authorId,
+            tags: req.body.tags.join(','),
+            imageUrl: req.body.imageUrl
+          }
+        })
+      }
+       
+      res.status(200).json(newPost);
+      await prisma.$disconnect()
       break;
     default:
       res.status(405).json({ error: 'Method not allowed' })

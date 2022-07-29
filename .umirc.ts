@@ -5,11 +5,15 @@ export default {
   },
   routes: [
     { path: '/',   redirect: '/login'  },
+    // { exact: true, path: '/home', component: 'home' },
     { path: '/login', component: 'login' },
     { path: '/register', component: 'register' },
-    // { path: '/abc', component: 'docs' },
-    { path: '/posts/create', component: 'posts/create'},
-    { path: '/posts/:postId', component: 'posts/post' },
+    { path: '/list', component: 'list' },
+    // { path: '/chart/:postId', component: 'chart' },
+    // { path: '/posts/create', component: 'posts/create'},
+    // { path: '/posts/:postId', component: 'posts/post' },
+    { path: '/project/create', component: 'project/create'},
+    { path: '/project/:postId', component: 'project/chart' },
     
   ],
   tailwindcss: {},
